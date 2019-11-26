@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/screens/configurations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:natal_smart/models/item_smart.dart';
 
 class MyHomePage extends StatefulWidget {
+  final List<ItemSmart> _itemsSmart = List();
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -26,6 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _atualiza(ItemSmart('Luz da Sala', 'Codigo da luz'));
     _connect();
   }
 
@@ -33,6 +37,24 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ConfigPage()),
+            ).then(
+              (res) async {
+                try {
+                  await _disconnect();
+                  _connect();
+                } catch (e) {
+                  print(e);
+                }
+              },
+            );
+          },
+        ),
         title: Text('Natal Smart'),
         actions: <Widget>[
           IconButton(
@@ -55,16 +77,23 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _value == '1'
-                ? Image.asset('assets/images/light_on.png')
-                : Image.asset('assets/images/light_off.png'),
-          ],
-        ),
+      body: ListView.builder(
+        itemCount: widget._itemsSmart.length,
+        itemBuilder: (context, indice) {
+          final transferencia = widget._itemsSmart[indice];
+          return ItemHome(transferencia);
+        },
       ),
+      // body: Center(
+      //   child: Column(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: <Widget>[
+      //       _value == '1'
+      //           ? Image.asset('assets/images/light_on.png')
+      //           : Image.asset('assets/images/light_off.png'),
+      //     ],
+      //   ),
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: _sendMessage,
         tooltip: 'Turn ON',
@@ -177,5 +206,47 @@ class _MyHomePageState extends State<MyHomePage> {
     /// Publish it
     debugPrint('EXAMPLE::Publishing our topic');
     client.publishMessage(_pubTopic, mqtt.MqttQos.exactlyOnce, builder.payload);
+  }
+
+  void _atualiza(ItemSmart itemRecebido) {
+    debugPrint('Veio aqui');
+    debugPrint('$itemRecebido');
+    if (itemRecebido != null) {
+      setState(() {
+        widget._itemsSmart.add(itemRecebido);
+      });
+    }
+  }
+}
+
+class ItemHome extends StatelessWidget {
+  final ItemSmart _item;
+
+  const ItemHome(this._item);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: ListTile(
+              leading: Image.asset('assets/images/light_off.png'),
+              title: Text(_item.nome),
+              subtitle: Text(_item.codigo),
+            ),
+          ),
+          FlatButton(
+            child: Icon(
+              Icons.share,
+              color: Colors.white,
+            ),
+            color: Color.fromRGBO(68, 153, 213, 1.0),
+            shape: CircleBorder(),
+            onPressed: () {},
+          ),
+        ],
+      ),
+    );
   }
 }
