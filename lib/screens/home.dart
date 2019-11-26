@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/screens/configurations.dart';
+import 'package:natal_smart/screens/novo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:natal_smart/models/item_smart.dart';
 
@@ -29,7 +30,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _atualiza(ItemSmart('Luz da Sala', 'Codigo da luz'));
     _connect();
   }
 
@@ -42,16 +42,9 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ConfigPage()),
+              MaterialPageRoute(builder: (context) => NovoPage()),
             ).then(
-              (res) async {
-                try {
-                  await _disconnect();
-                  _connect();
-                } catch (e) {
-                  print(e);
-                }
-              },
+              (itemRecebido) => _atualiza(itemRecebido),
             );
           },
         ),
@@ -238,7 +231,7 @@ class ItemHome extends StatelessWidget {
           ),
           FlatButton(
             child: Icon(
-              Icons.share,
+              Icons.highlight,
               color: Colors.white,
             ),
             color: Color.fromRGBO(68, 153, 213, 1.0),
