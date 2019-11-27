@@ -159,9 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final mqtt.MqttConnectMessage connMess = mqtt.MqttConnectMessage()
         .withClientIdentifier(clientIdentifier)
-        .startClean() // Non persistent session for testing
         .keepAliveFor(30)
-        .withWillQos(mqtt.MqttQos.atMostOnce);
+        .withWillQos(mqtt.MqttQos.atLeastOnce);
     client.connectionMessage = connMess;
 
     try {
@@ -199,10 +198,6 @@ class _MyHomePageState extends State<MyHomePage> {
     final String message = mqtt.MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
     setState(() {
-      debugPrint('Topico');
-      debugPrint(recMess.payload.variableHeader.topicName);
-      debugPrint('Mensagem Recebida');
-      debugPrint(message);
       _updateItem(message, recMess.payload.variableHeader.topicName);
     });
   }
@@ -230,6 +225,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     /// Publish it
     debugPrint('EXAMPLE::Publishing our topic');
-    client.publishMessage(topic, mqtt.MqttQos.exactlyOnce, builder.payload, retain: true);
+    client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload, retain: true);
   }
 }
