@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/components/item_smart.dart';
@@ -160,31 +161,41 @@ class _MyHomePageState extends State<MyHomePage> {
     final mqtt.MqttConnectMessage connMess = mqtt.MqttConnectMessage()
         .withClientIdentifier(clientIdentifier)
         .keepAliveFor(30)
-        .withWillQos(mqtt.MqttQos.atLeastOnce);
+        .withWillQos(mqtt.MqttQos.atMostOnce);
     client.connectionMessage = connMess;
 
     try {
       await client.connect();
     } catch (e) {
       print(e);
+      Fluttertoast.showToast(
+        msg: e.toString(),
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIos: 10,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0
+      );
       _disconnect();
     }
 
-    if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
-      setState(() {
-        print('EXAMPLE::Mosquitto client connected');
-        connectionState = client.connectionStatus.state;
-      });
-    } else {
-      print(
-          'EXAMPLE::ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+    if (client != null) {
+      if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
+        setState(() {
+          print('EXAMPLE::Mosquitto client connected');
+          connectionState = client.connectionStatus.state;
+        });
+      } else {
+        print(
+            'EXAMPLE::ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+      }
 
-      _disconnect();
+      subscription = client.updates.listen(_onMessage);
+
+      _loadData();
     }
 
-    subscription = client.updates.listen(_onMessage);
-
-    _loadData();
   }
 
   void _subscribeToTopic(String topic) {
