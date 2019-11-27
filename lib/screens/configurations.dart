@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:natal_smart/components/dropdown.dart';
 import 'package:natal_smart/components/editor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -13,8 +12,6 @@ class _ConfigPageState extends State<ConfigPage> {
   final TextEditingController _controladorHostname = TextEditingController();
   final TextEditingController _controladorPort = TextEditingController();
   final TextEditingController _controladorClientId = TextEditingController();
-  final TextEditingController _controladorSubscribeTopic = TextEditingController();
-  final TextEditingController _controladorPublishTopic = TextEditingController();
 
   @override
   void initState() {
@@ -28,8 +25,6 @@ class _ConfigPageState extends State<ConfigPage> {
       _controladorHostname.text = (prefs.getString('hostname') ?? '');
       _controladorPort.text = (prefs.getInt('port') ?? '').toString();
       _controladorClientId.text = (prefs.getString('clientID') ?? '');
-      _controladorPublishTopic.text = (prefs.getString('pubTopic') ?? '');
-      _controladorSubscribeTopic.text = (prefs.getString('subsTopic') ?? '');
     });
   }
 
@@ -62,32 +57,6 @@ class _ConfigPageState extends State<ConfigPage> {
               controller: _controladorClientId,
               rotulo: 'Client ID',
             ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Editor(
-                    controller: _controladorSubscribeTopic,
-                    rotulo: 'Subscribe Topic',
-                  ),
-                ),
-                Expanded(
-                  child: QoSSelector(),
-                ),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Editor(
-                    controller: _controladorPublishTopic,
-                    rotulo: 'Publish Topic',
-                  ),
-                ),
-                Expanded(
-                  child: QoSSelector(),
-                ),
-              ],
-            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: RaisedButton(
@@ -105,16 +74,12 @@ class _ConfigPageState extends State<ConfigPage> {
     final String hostname = _controladorHostname.text;
     final int port = int.tryParse(_controladorPort.text);
     final String clientID = _controladorClientId.text;
-    final String subsTopic = _controladorSubscribeTopic.text;
-    final String pubTopic = _controladorPublishTopic.text;
 
     final prefs = await SharedPreferences.getInstance();
 
     prefs.setString('hostname', hostname);
     prefs.setInt('port', port);
     prefs.setString('clientID', clientID);
-    prefs.setString('subsTopic', subsTopic);
-    prefs.setString('pubTopic', pubTopic);
 
     Fluttertoast.showToast(
         msg: "Saved",
@@ -125,10 +90,5 @@ class _ConfigPageState extends State<ConfigPage> {
         textColor: Colors.white,
         fontSize: 16.0
     );
-
-    // final mqttConfig = MQTTConfiguration(hostname, port, clientID, subsTopic, pubTopic);
-
-    // final transferenciaCriada = Transferencia(valor, numeroConta);
-    // Navigator.pop(context, transferenciaCriada);
   }
 }

@@ -1,14 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
+import 'package:natal_smart/components/item_smart.dart';
 import 'package:natal_smart/screens/configurations.dart';
 import 'package:natal_smart/screens/novo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:natal_smart/models/item_smart.dart';
 
 class MyHomePage extends StatefulWidget {
-  final List<ItemSmart> _itemsSmart = List();
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -19,9 +20,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String username = '';
   String passwd = '';
   String clientIdentifier = 'gigio';
-  String _value = '0';
-  String _pubTopic = 'gigioxtopic';
-  String _subTopic = 'gigioxtopic';
+
+  List<Item> _itemsSmart = List();
 
   mqtt.MqttClient client;
   mqtt.MqttConnectionState connectionState;
@@ -29,8 +29,33 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    super.initState();
     _connect();
+    super.initState();
+  }
+
+  void _saveItem(Item itemSmart) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (itemSmart != null) {
+      setState(() => _itemsSmart.add(itemSmart));
+      _subscribeToTopic(itemSmart.codigo);
+      List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
+      prefs.setStringList('items', stringList);
+    }
+  }
+
+  void _loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      List<String> savedList = (prefs.getStringList('items') ?? []);
+      List list = json.decode(savedList.toString()) as List;
+      List<Item> itemsSmart = list.map((i) => Item.fromJson(i)).toList();
+
+      _itemsSmart = itemsSmart;
+
+      _itemsSmart.forEach((item) => {
+        _subscribeToTopic(item.codigo)
+      });
+    });
   }
 
   @override
@@ -44,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
               context,
               MaterialPageRoute(builder: (context) => NovoPage()),
             ).then(
-              (itemRecebido) => _atualiza(itemRecebido),
+              (itemRecebido) => _saveItem(itemRecebido),
             );
           },
         ),
@@ -71,10 +96,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: ListView.builder(
-        itemCount: widget._itemsSmart.length,
+        itemCount: _itemsSmart.length,
         itemBuilder: (context, indice) {
-          final transferencia = widget._itemsSmart[indice];
-          return ItemHome(transferencia);
+          final item = _itemsSmart[indice];
+          return ItemSmart(
+            item: item,
+            index: indice,
+            status: item.status,
+            deleted: _deleteItem,
+            onChange: _sendMessage,
+          );
         },
       ),
       // body: Center(
@@ -87,13 +118,28 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ],
       //   ),
       // ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _sendMessage,
-        tooltip: 'Turn ON',
-        child:
-            _value == '1' ? Icon(Icons.highlight_off) : Icon(Icons.highlight),
-      ),
     );
+  }
+
+  Future _deleteItem(index) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Item removedItem = _itemsSmart.removeAt(index);
+
+    List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
+    prefs.setStringList('items', stringList);
+    client.unsubscribe(removedItem.codigo);
+  }
+
+  Future _updateItem(message, topicName) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _itemsSmart.forEach((item) {
+      if(item.codigo == topicName) {
+        item.status = message == '1' ? true : false;
+      }
+    });
+
+    List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
+    prefs.setStringList('items', stringList);
   }
 
   void _connect() async {
@@ -103,8 +149,6 @@ class _MyHomePageState extends State<MyHomePage> {
       broker = (prefs.getString('hostname') ?? broker);
       port = (prefs.getInt('port') ?? port);
       clientIdentifier = (prefs.getString('clientID') ?? clientIdentifier);
-      _pubTopic = (prefs.getString('pubTopic') ?? _pubTopic);
-      _subTopic = (prefs.getString('subsTopic') ?? _subTopic);
     });
 
     client = mqtt.MqttClient(broker, '');
@@ -141,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     subscription = client.updates.listen(_onMessage);
 
-    _subscribeToTopic(_subTopic);
+    _loadData();
   }
 
   void _subscribeToTopic(String topic) {
@@ -151,15 +195,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onMessage(List<mqtt.MqttReceivedMessage> event) {
-    final mqtt.MqttPublishMessage recMess =
-        event[0].payload as mqtt.MqttPublishMessage;
-    final String message =
-        mqtt.MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+    final mqtt.MqttPublishMessage recMess = event[0].payload as mqtt.MqttPublishMessage;
+    final String message = mqtt.MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
     setState(() {
+      debugPrint('Topico');
+      debugPrint(recMess.payload.variableHeader.topicName);
       debugPrint('Mensagem Recebida');
       debugPrint(message);
-      _value = message;
+      _updateItem(message, recMess.payload.variableHeader.topicName);
     });
   }
 
@@ -178,68 +222,14 @@ class _MyHomePageState extends State<MyHomePage> {
     print('[MQTT client] MQTT client disconnected');
   }
 
-  void _sendMessage() {
+  void _sendMessage(topic, value) {
     final mqtt.MqttClientPayloadBuilder builder =
         mqtt.MqttClientPayloadBuilder();
 
-    debugPrint('Mensagem pra enviar');
-    debugPrint(_value);
-    if (_value == '1') {
-      setState(() {
-        _value = '-1';
-      });
-      builder.addString('-1');
-    } else {
-      setState(() {
-        _value = '1';
-      });
-      builder.addString('1');
-    }
+    builder.addString(value);
 
     /// Publish it
     debugPrint('EXAMPLE::Publishing our topic');
-    client.publishMessage(_pubTopic, mqtt.MqttQos.exactlyOnce, builder.payload);
-  }
-
-  void _atualiza(ItemSmart itemRecebido) {
-    debugPrint('Veio aqui');
-    debugPrint('$itemRecebido');
-    if (itemRecebido != null) {
-      setState(() {
-        widget._itemsSmart.add(itemRecebido);
-      });
-    }
-  }
-}
-
-class ItemHome extends StatelessWidget {
-  final ItemSmart _item;
-
-  const ItemHome(this._item);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: ListTile(
-              leading: Image.asset('assets/images/light_off.png'),
-              title: Text(_item.nome),
-              subtitle: Text(_item.codigo),
-            ),
-          ),
-          FlatButton(
-            child: Icon(
-              Icons.highlight,
-              color: Colors.white,
-            ),
-            color: Color.fromRGBO(68, 153, 213, 1.0),
-            shape: CircleBorder(),
-            onPressed: () {},
-          ),
-        ],
-      ),
-    );
+    client.publishMessage(topic, mqtt.MqttQos.exactlyOnce, builder.payload, retain: true);
   }
 }

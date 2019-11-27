@@ -45,7 +45,7 @@ class _NovoPageState extends State<NovoPage> {
     final String nome = _controladorNome.text;
     final String codigo = _controladorCodigo.text;
 
-    final itemSmart = ItemSmart(nome, codigo);
+    final itemSmart = Item(nome, codigo, false);
 
     Navigator.pop(context, itemSmart);
   }
