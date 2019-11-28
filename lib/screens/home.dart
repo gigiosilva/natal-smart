@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/components/item_smart.dart';
 import 'package:natal_smart/screens/configurations.dart';
+import 'package:natal_smart/screens/nfc.dart';
 import 'package:natal_smart/screens/novo.dart';
 import 'package:natal_smart/services/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +53,19 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('Smart Home'),
         actions: <Widget>[
           IconButton(
+            icon: Icon(Icons.nfc),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NFCPage()),
+              ).then(
+                (changed) async {
+                  
+                },
+              );
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.tune),
             onPressed: () {
               Navigator.push(
@@ -60,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ).then(
                 (changed) async {
                   try {
-                    if(changed) {
+                    if (changed) {
                       _disconnect();
                       _connect();
                     }
@@ -124,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _updateItem(message, topicName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _itemsSmart.forEach((item) {
-      if(item.codigo == topicName) {
+      if (item.codigo == topicName) {
         item.status = message == '1' ? true : false;
       }
     });
@@ -156,24 +170,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       await client.connect();
-      if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
-        setState(() {
-          connectionState = client.connectionStatus.state;
-          ToastService.showPositive(msg: 'Connected to $broker');
-        });
-      }
-
-      subscription = client.updates.listen(_onMessage);
-
     } catch (e) {
       print(e);
       ToastService.showNegative(msg: e.toString(), duration: 5);
-      subscription.cancel();
       _disconnect();
     }
   }
 
   void _onConnected() {
+    connectionState = client.connectionStatus.state;
+    ToastService.showPositive(msg: 'Connected to $broker');
+    subscription = client.updates.listen(_onMessage);
+
     _itemsSmart.forEach((item) {
       _subscribeToTopic(item.codigo);
     });
@@ -182,12 +190,19 @@ class _MyHomePageState extends State<MyHomePage> {
   void _subscribeToTopic(String topic) {
     if (connectionState == mqtt.MqttConnectionState.connected) {
       client.subscribe(topic, mqtt.MqttQos.exactlyOnce);
+      debugPrint('Subscribed to $topic');
+    } else {
+      debugPrint('Error Subscribing $connectionState');
+      ToastService.showNegative(
+          msg: 'Error Subscribing $connectionState', duration: 3);
     }
   }
 
   void _onMessage(List<mqtt.MqttReceivedMessage> event) {
-    final mqtt.MqttPublishMessage recMess = event[0].payload as mqtt.MqttPublishMessage;
-    final String message = mqtt.MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+    final mqtt.MqttPublishMessage recMess =
+        event[0].payload as mqtt.MqttPublishMessage;
+    final String message =
+        mqtt.MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
     setState(() {
       _updateItem(message, recMess.payload.variableHeader.topicName);
@@ -195,27 +210,29 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _disconnect() async {
-    if(client != null) client.disconnect();
+    if (client != null) client.disconnect();
   }
 
   void _onDisconnected() {
-    setState(() {
-      connectionState = null;
-      client = null;
-    });
+    subscription.cancel();
+    connectionState = null;
+    client = null;
     ToastService.showNegative(msg: 'Disconnected');
   }
 
   void _sendMessage(topic, value) {
-    final mqtt.MqttClientPayloadBuilder builder = mqtt.MqttClientPayloadBuilder();
+    final mqtt.MqttClientPayloadBuilder builder =
+        mqtt.MqttClientPayloadBuilder();
 
     builder.addString(value);
 
-    if(client != null) {
-      client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload, retain: true);
+    if (client != null) {
+      client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload,
+          retain: true);
     } else {
       _connect();
-      client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload, retain: true);
+      client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload,
+          retain: true);
       ToastService.showPositive(msg: 'Reconnecting..');
     }
   }
