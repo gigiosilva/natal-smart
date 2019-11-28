@@ -170,6 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       await client.connect();
+      // await client.connect(username, passwd);
     } catch (e) {
       print(e);
       ToastService.showNegative(msg: e.toString(), duration: 5);
