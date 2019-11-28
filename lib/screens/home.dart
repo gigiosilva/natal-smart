@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/components/item_smart.dart';
 import 'package:natal_smart/screens/configurations.dart';
 import 'package:natal_smart/screens/novo.dart';
+import 'package:natal_smart/services/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:natal_smart/models/item_smart.dart';
 
@@ -30,33 +30,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    _connect();
+    _loadData();
     super.initState();
-  }
-
-  void _saveItem(Item itemSmart) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (itemSmart != null) {
-      setState(() => _itemsSmart.add(itemSmart));
-      _subscribeToTopic(itemSmart.codigo);
-      List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
-      prefs.setStringList('items', stringList);
-    }
-  }
-
-  void _loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      List<String> savedList = (prefs.getStringList('items') ?? []);
-      List list = json.decode(savedList.toString()) as List;
-      List<Item> itemsSmart = list.map((i) => Item.fromJson(i)).toList();
-
-      _itemsSmart = itemsSmart;
-
-      _itemsSmart.forEach((item) => {
-        _subscribeToTopic(item.codigo)
-      });
-    });
   }
 
   @override
@@ -74,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           },
         ),
-        title: Text('Natal Smart'),
+        title: Text('Smart Home'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.tune),
@@ -83,10 +58,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute(builder: (context) => ConfigPage()),
               ).then(
-                (res) async {
+                (changed) async {
                   try {
-                    await _disconnect();
-                    _connect();
+                    if(changed) {
+                      _disconnect();
+                      _connect();
+                    }
                   } catch (e) {
                     print(e);
                   }
@@ -109,29 +86,42 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
       ),
-      // body: Center(
-      //   child: Column(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: <Widget>[
-      //       _value == '1'
-      //           ? Image.asset('assets/images/light_on.png')
-      //           : Image.asset('assets/images/light_off.png'),
-      //     ],
-      //   ),
-      // ),
     );
   }
 
-  Future _deleteItem(index) async {
+  void _loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    Item removedItem = _itemsSmart.removeAt(index);
+    setState(() {
+      List<String> savedList = (prefs.getStringList('items') ?? []);
+      List list = json.decode(savedList.toString()) as List;
+      List<Item> itemsSmart = list.map((i) => Item.fromJson(i)).toList();
 
+      _itemsSmart = itemsSmart;
+
+      _connect();
+    });
+  }
+
+  void _saveItem(Item itemSmart) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (itemSmart != null) {
+      setState(() => _itemsSmart.add(itemSmart));
+      _subscribeToTopic(itemSmart.codigo);
+      List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
+      prefs.setStringList('items', stringList);
+    }
+  }
+
+  void _deleteItem(index) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Item removedItem = _itemsSmart.removeAt(index);
     List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
     prefs.setStringList('items', stringList);
     client.unsubscribe(removedItem.codigo);
   }
 
-  Future _updateItem(message, topicName) async {
+  void _updateItem(message, topicName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _itemsSmart.forEach((item) {
       if(item.codigo == topicName) {
@@ -146,56 +136,47 @@ class _MyHomePageState extends State<MyHomePage> {
   void _connect() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    setState(() {
-      broker = (prefs.getString('hostname') ?? broker);
-      port = (prefs.getInt('port') ?? port);
-      clientIdentifier = (prefs.getString('clientID') ?? clientIdentifier);
-    });
+    broker = (prefs.getString('hostname') ?? broker);
+    port = (prefs.getInt('port') ?? port);
+    clientIdentifier = (prefs.getString('clientID') ?? clientIdentifier);
 
-    client = mqtt.MqttClient(broker, '');
+    client = mqtt.MqttClient(broker, clientIdentifier);
     client.port = port;
     client.logging(on: true);
     client.keepAlivePeriod = 30;
     client.onDisconnected = _onDisconnected;
+    client.onConnected = _onConnected;
 
     final mqtt.MqttConnectMessage connMess = mqtt.MqttConnectMessage()
         .withClientIdentifier(clientIdentifier)
         .keepAliveFor(30)
         .withWillQos(mqtt.MqttQos.atMostOnce);
+
     client.connectionMessage = connMess;
 
     try {
       await client.connect();
-    } catch (e) {
-      print(e);
-      Fluttertoast.showToast(
-        msg: e.toString(),
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIos: 10,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
-      _disconnect();
-    }
-
-    if (client != null) {
       if (client.connectionStatus.state == mqtt.MqttConnectionState.connected) {
         setState(() {
-          print('EXAMPLE::Mosquitto client connected');
           connectionState = client.connectionStatus.state;
+          ToastService.showPositive(msg: 'Connected to $broker');
         });
-      } else {
-        print(
-            'EXAMPLE::ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
       }
 
       subscription = client.updates.listen(_onMessage);
 
-      _loadData();
+    } catch (e) {
+      print(e);
+      ToastService.showNegative(msg: e.toString(), duration: 5);
+      subscription.cancel();
+      _disconnect();
     }
+  }
 
+  void _onConnected() {
+    _itemsSmart.forEach((item) {
+      _subscribeToTopic(item.codigo);
+    });
   }
 
   void _subscribeToTopic(String topic) {
@@ -213,29 +194,29 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future _disconnect() async {
-    print('[MQTT client] _disconnect()');
-    client.disconnect();
-    _onDisconnected();
+  void _disconnect() async {
+    if(client != null) client.disconnect();
   }
 
   void _onDisconnected() {
-    print('[MQTT client] _onDisconnected');
     setState(() {
       connectionState = null;
       client = null;
     });
-    print('[MQTT client] MQTT client disconnected');
+    ToastService.showNegative(msg: 'Disconnected');
   }
 
   void _sendMessage(topic, value) {
-    final mqtt.MqttClientPayloadBuilder builder =
-        mqtt.MqttClientPayloadBuilder();
+    final mqtt.MqttClientPayloadBuilder builder = mqtt.MqttClientPayloadBuilder();
 
     builder.addString(value);
 
-    /// Publish it
-    debugPrint('EXAMPLE::Publishing our topic');
-    client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload, retain: true);
+    if(client != null) {
+      client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload, retain: true);
+    } else {
+      _connect();
+      client.publishMessage(topic, mqtt.MqttQos.atLeastOnce, builder.payload, retain: true);
+      ToastService.showPositive(msg: 'Reconnecting..');
+    }
   }
 }

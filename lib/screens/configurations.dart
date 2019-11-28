@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:natal_smart/components/editor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-
 class ConfigPage extends StatefulWidget {
   @override
   _ConfigPageState createState() => _ConfigPageState();
@@ -81,14 +79,6 @@ class _ConfigPageState extends State<ConfigPage> {
     prefs.setInt('port', port);
     prefs.setString('clientID', clientID);
 
-    Fluttertoast.showToast(
-        msg: "Saved",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIos: 1,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0
-    );
+    Navigator.pop(context, true);
   }
 }
