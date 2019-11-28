@@ -1,1 +1,1 @@
-{"dependencyGraph":[{"name":"fluttertoast","dependencies":[]},{"name":"shared_preferences","dependencies":[]}]}
+{"dependencyGraph":[{"name":"fluttertoast","dependencies":[]},{"name":"nfc_hce_reader","dependencies":[]},{"name":"shared_preferences","dependencies":[]}]}

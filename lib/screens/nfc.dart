@@ -22,15 +22,20 @@ class _NFCPageState extends State<NFCPage> {
   Future<void> initPlatformState() async {
     bool isInitialized;
     try {
-      if(await NfcHceReader.isNFCAvailable) {
-        isInitialized = await NfcHceReader.initializeNFCReading();
-        _readNFC(context);
-      } else {
-        _message = 'NFC not available';
-      }
-    } on PlatformException catch(e){
+      isInitialized = await NfcHceReader.initializeNFCReading();
+      _readNFC(context);
+    } on PlatformException catch (e) {
       debugPrint('Deu Ruim');
       debugPrint(e.message);
+      setState(() {
+        _message = e.message;
+      });
+    } catch(e) {
+      debugPrint('Deu Ruim');
+      debugPrint(e.message);
+      setState(() {
+        _message = e.message;
+      });
     }
 
     if (!mounted) return;
@@ -41,19 +46,25 @@ class _NFCPageState extends State<NFCPage> {
         NfcHceReader.readNFCStream().listen((tag) {
       setState(() {
         _message = tag;
+        debugPrint("Tag");
+        debugPrint(tag);
         _stream?.cancel();
       });
     }, onDone: () {
       setState(() {
         _stream = null;
+        debugPrint("Done");
       });
     }, onError: (e) {
       setState(() {
         _stream = null;
+        _message = e;
+        debugPrint("Deu Erro $e");
       });
     });
     setState(() {
       _stream = subscription;
+      debugPrint('Streamou');
     });
   }
 
@@ -65,6 +76,11 @@ class _NFCPageState extends State<NFCPage> {
       ),
       body: Center(
         child: Text('Running on: $_message\n'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: initPlatformState,
+        tooltip: 'Reload',
+        child: Icon(Icons.replay),
       ),
     );
   }
