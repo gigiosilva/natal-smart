@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
-import 'package:nfc_in_flutter/nfc_in_flutter.dart';
 
 class NFCPage extends StatefulWidget {
   @override
@@ -8,7 +7,6 @@ class NFCPage extends StatefulWidget {
 }
 
 class _NFCPageState extends State<NFCPage> {
-  List<NDEFRecord> _itemsSmart = List();
   TextEditingController writerController = TextEditingController();
 
   @override
@@ -42,24 +40,24 @@ class _NFCPageState extends State<NFCPage> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: _itemsSmart.length,
-        itemBuilder: (context, indice) {
-          final item = _itemsSmart[indice];
-          return Card(
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: ListTile(
-                    title: Text(item.data),
-                    subtitle: Text(item.languageCode),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+      // body: ListView.builder(
+      //   itemCount: _itemsSmart.length,
+      //   itemBuilder: (context, indice) {
+      //     final item = _itemsSmart[indice];
+      //     return Card(
+      //       child: Row(
+      //         children: <Widget>[
+      //           Expanded(
+      //             child: ListTile(
+      //               title: Text(item.data),
+      //               subtitle: Text(item.languageCode),
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //     );
+      //   },
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
             FlutterNfcReader.write(" ", writerController.text).then((value) {

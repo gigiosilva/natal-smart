@@ -1,33 +1,40 @@
 PODS:
   - Flutter (1.0.0)
-  - fluttertoast (0.0.2):
+  - flutter_nfc_reader (0.0.1):
     - Flutter
-  - nfc_hce_reader (0.0.1):
+    - VYNFCKit
+  - fluttertoast (0.0.2):
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
+  - VYNFCKit (0.3.2)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_nfc_reader (from `.symlinks/plugins/flutter_nfc_reader/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
-  - nfc_hce_reader (from `.symlinks/plugins/nfc_hce_reader/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+
+SPEC REPOS:
+  trunk:
+    - VYNFCKit
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_nfc_reader:
+    :path: ".symlinks/plugins/flutter_nfc_reader/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
-  nfc_hce_reader:
-    :path: ".symlinks/plugins/nfc_hce_reader/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_nfc_reader: 67d71071d779d28b827ea50dcbe00d09286f253d
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
-  nfc_hce_reader: b7a6a26bb5f97b8c46d2e4461b95c8ea7a60a66d
   shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
+  VYNFCKit: 86a9b711fd1f34f6f7128a2a883cd58dbd781b9d
 
 PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
 
