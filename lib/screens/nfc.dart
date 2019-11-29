@@ -1,7 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:natal_smart/components/item_smart.dart';
+import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:nfc_in_flutter/nfc_in_flutter.dart';
 
 class NFCPage extends StatefulWidget {
@@ -11,45 +9,23 @@ class NFCPage extends StatefulWidget {
 
 class _NFCPageState extends State<NFCPage> {
   List<NDEFRecord> _itemsSmart = List();
-  StreamSubscription<NDEFMessage> _stream;
+  TextEditingController writerController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-  }
-
-  void _startScanning() {
-    setState(() {
-      _stream = NFC.readNDEF(once: true).listen((NDEFMessage message) {
-        print("Read NDEF message with ${message.records.length} records");
-        _itemsSmart = message.records;
-        for (NDEFRecord record in message.records) {
-          print(
-              "Record '${record.id ?? "[NO ID]"}' with TNF '${record.tnf}', type '${record.type}', payload '${record.payload}' and data '${record.data}' and language code '${record.languageCode}'");
-        }
-      });
+    FlutterNfcReader.onTagDiscovered().listen((onData) {
+      print(onData.id);
+      print(onData.content);
     });
-  }
-
-  void _stopScanning() {
-    _stream?.cancel();
-    setState(() {
-      _stream = null;
-    });
-  }
-
-  void _toggleScan() {
-    if (_stream == null) {
-      _startScanning();
-    } else {
-      _stopScanning();
-    }
   }
 
   @override
   void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
+    writerController.dispose();
     super.dispose();
-    _stopScanning();
   }
 
   @override
@@ -60,7 +36,9 @@ class _NFCPageState extends State<NFCPage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.nfc),
-            onPressed: _startScanning,
+            onPressed: () {
+              FlutterNfcReader.read();
+            },
           ),
         ],
       ),
@@ -83,7 +61,11 @@ class _NFCPageState extends State<NFCPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+            FlutterNfcReader.write(" ", writerController.text).then((value) {
+              print(value.content);
+            });
+          },
         tooltip: 'Reload',
         child: Icon(Icons.wb_iridescent),
       ),
