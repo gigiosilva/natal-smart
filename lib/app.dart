@@ -17,12 +17,12 @@ class NatalSmartHomePage extends StatelessWidget {
       tabBar: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.home),
-            title: Text('Products'),
+            icon: Icon(CupertinoIcons.brightness),
+            title: Text('List'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.search),
-            title: Text('Search'),
+            icon: Icon(CupertinoIcons.tags),
+            title: Text('NFC'),
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.shopping_cart),
