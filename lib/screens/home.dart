@@ -1,12 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/components/item_smart.dart';
-import 'package:natal_smart/screens/configurations.dart';
-import 'package:natal_smart/screens/nfc.dart';
-import 'package:natal_smart/screens/novo.dart';
 import 'package:natal_smart/services/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:natal_smart/models/item_smart.dart';
@@ -37,71 +35,107 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NovoPage()),
-            ).then(
-              (itemRecebido) => _saveItem(itemRecebido),
-            );
-          },
-        ),
-        title: Text('Smart Home'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.nfc),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NFCPage()),
-              ).then(
-                (changed) async {
-                  
-                },
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.tune),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ConfigPage()),
-              ).then(
-                (changed) async {
-                  try {
-                    if (changed) {
-                      _disconnect();
-                      _connect();
-                    }
-                  } catch (e) {
-                    print(e);
-                  }
-                },
-              );
-            },
-          ),
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: _itemsSmart.length,
-        itemBuilder: (context, indice) {
-          final item = _itemsSmart[indice];
-          return ItemSmart(
-            item: item,
-            index: indice,
-            status: item.status,
-            deleted: _deleteItem,
-            onChange: _sendMessage,
-          );
-        },
-      ),
+    return CupertinoPageScaffold (
+      child: CustomScrollView (
+          semanticChildCount: _itemsSmart.length,
+          slivers: <Widget>[
+            const CupertinoSliverNavigationBar(
+              largeTitle: Text('Smart Home'),
+            ),
+            SliverSafeArea(
+              top: false,
+              minimum: const EdgeInsets.only(top: 8),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final item = _itemsSmart[index];
+                    // if (index < _itemsSmart.length) {
+                      return ItemSmart(
+                        item: item,
+                        index: index,
+                        status: item.status,
+                        deleted: _deleteItem,
+                        onChange: _sendMessage,
+                      );
+                    // }
+                    // return null;
+                  },
+                  childCount: _itemsSmart.length
+                ),
+              ),
+            )
+          ],
+        )
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       leading: IconButton(
+  //         icon: Icon(Icons.add),
+  //         onPressed: () {
+  //           Navigator.push(
+  //             context,
+  //             MaterialPageRoute(builder: (context) => NovoPage()),
+  //           ).then(
+  //             (itemRecebido) => _saveItem(itemRecebido),
+  //           );
+  //         },
+  //       ),
+  //       title: Text('Smart Home'),
+  //       actions: <Widget>[
+  //         IconButton(
+  //           icon: Icon(Icons.nfc),
+  //           onPressed: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (context) => NFCPage()),
+  //             ).then(
+  //               (changed) async {
+                  
+  //               },
+  //             );
+  //           },
+  //         ),
+  //         IconButton(
+  //           icon: Icon(Icons.tune),
+  //           onPressed: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (context) => ConfigPage()),
+  //             ).then(
+  //               (changed) async {
+  //                 try {
+  //                   if (changed) {
+  //                     _disconnect();
+  //                     _connect();
+  //                   }
+  //                 } catch (e) {
+  //                   print(e);
+  //                 }
+  //               },
+  //             );
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //     body: ListView.builder(
+  //       itemCount: _itemsSmart.length,
+  //       itemBuilder: (context, indice) {
+  //         final item = _itemsSmart[indice];
+  //         return ItemSmart(
+  //           item: item,
+  //           index: indice,
+  //           status: item.status,
+  //           deleted: _deleteItem,
+  //           onChange: _sendMessage,
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 
   void _loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

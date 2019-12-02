@@ -1,15 +1,16 @@
 import 'package:flutter/cupertino.dart';
+import 'package:natal_smart/screens/home.dart';
 
-class CupertinoStoreApp extends StatelessWidget {
+class NatalSmartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
-      home: CupertinoStoreHomePage(),
+      home: NatalSmartHomePage(),
     );
   }
 }
 
-class CupertinoStoreHomePage extends StatelessWidget {
+class NatalSmartHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
@@ -34,22 +35,20 @@ class CupertinoStoreHomePage extends StatelessWidget {
         switch (index) {
           case 0:
             returnValue = CupertinoTabView(builder: (context) {
-              return CupertinoPageScaffold(
-                child: ProductListTab(),
-              );
+              return MyHomePage();
             });
             break;
           case 1:
             returnValue = CupertinoTabView(builder: (context) {
               return CupertinoPageScaffold(
-                child: SearchTab(),
+                // child: SearchTab(),
               );
             });
             break;
           case 2:
             returnValue = CupertinoTabView(builder: (context) {
               return CupertinoPageScaffold(
-                child: ShoppingCartTab(),
+                // child: ShoppingCartTab(),
               );
             });
             break;
