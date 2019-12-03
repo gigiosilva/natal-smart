@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/components/item_smart.dart';
+import 'package:natal_smart/screens/novo.dart';
 import 'package:natal_smart/services/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:natal_smart/models/item_smart.dart';
@@ -35,37 +36,46 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold (
-      child: CustomScrollView (
-          semanticChildCount: _itemsSmart.length,
-          slivers: <Widget>[
-            const CupertinoSliverNavigationBar(
-              largeTitle: Text('Smart Home'),
-            ),
-            SliverSafeArea(
-              top: false,
-              minimum: const EdgeInsets.only(top: 8),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final item = _itemsSmart[index];
-                    // if (index < _itemsSmart.length) {
-                      return ItemSmart(
-                        item: item,
-                        index: index,
-                        status: item.status,
-                        deleted: _deleteItem,
-                        onChange: _sendMessage,
-                      );
-                    // }
-                    // return null;
-                  },
-                  childCount: _itemsSmart.length
-                ),
+    return CupertinoPageScaffold(
+      child: CustomScrollView(
+        semanticChildCount: _itemsSmart.length,
+        slivers: <Widget>[
+          CupertinoSliverNavigationBar(
+            largeTitle: Text('Smart Home'),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Icon(
+                CupertinoIcons.plus_circled,
+                semanticLabel: 'Add',
               ),
-            )
-          ],
-        )
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(builder: (context) => NovoPage()),
+                ).then(
+                  (itemRecebido) => _saveItem(itemRecebido),
+                );
+              },
+            ),
+          ),
+          SliverSafeArea(
+            top: false,
+            minimum: EdgeInsets.only(top: 8),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final item = _itemsSmart[index];
+                return ItemSmart(
+                  item: item,
+                  index: index,
+                  status: item.status,
+                  deleted: _deleteItem,
+                  onChange: _sendMessage,
+                );
+              }, childCount: _itemsSmart.length),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -76,12 +86,12 @@ class _MyHomePageState extends State<MyHomePage> {
   //       leading: IconButton(
   //         icon: Icon(Icons.add),
   //         onPressed: () {
-  //           Navigator.push(
-  //             context,
-  //             MaterialPageRoute(builder: (context) => NovoPage()),
-  //           ).then(
-  //             (itemRecebido) => _saveItem(itemRecebido),
-  //           );
+  // Navigator.push(
+  //   context,
+  //   MaterialPageRoute(builder: (context) => NovoPage()),
+  // ).then(
+  //   (itemRecebido) => _saveItem(itemRecebido),
+  // );
   //         },
   //       ),
   //       title: Text('Smart Home'),
@@ -94,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //               MaterialPageRoute(builder: (context) => NFCPage()),
   //             ).then(
   //               (changed) async {
-                  
+
   //               },
   //             );
   //           },

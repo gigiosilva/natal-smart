@@ -25,8 +25,8 @@ class NatalSmartHomePage extends StatelessWidget {
             title: Text('NFC'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.shopping_cart),
-            title: Text('Cart'),
+            icon: Icon(CupertinoIcons.settings),
+            title: Text('Server'),
           ),
         ],
       ),
