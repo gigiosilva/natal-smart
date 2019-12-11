@@ -10,6 +10,8 @@ class _ConfigPageState extends State<ConfigPage> {
   final TextEditingController _controladorHostname = TextEditingController();
   final TextEditingController _controladorPort = TextEditingController();
   final TextEditingController _controladorClientId = TextEditingController();
+  final TextEditingController _controladorUsername = TextEditingController();
+  final TextEditingController _controladorPassword = TextEditingController();
 
   @override
   void initState() {
@@ -23,6 +25,8 @@ class _ConfigPageState extends State<ConfigPage> {
       _controladorHostname.text = (prefs.getString('hostname') ?? '');
       _controladorPort.text = (prefs.getInt('port') ?? '').toString();
       _controladorClientId.text = (prefs.getString('clientID') ?? '');
+      _controladorUsername.text = (prefs.getString('username') ?? '');
+      _controladorPassword.text = (prefs.getString('password') ?? '');
     });
   }
 
@@ -55,6 +59,22 @@ class _ConfigPageState extends State<ConfigPage> {
               controller: _controladorClientId,
               rotulo: 'Client ID',
             ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Editor(
+                    controller: _controladorUsername,
+                    rotulo: 'Username',
+                  ),
+                ),
+                Expanded(
+                  child: Editor(
+                    controller: _controladorPassword,
+                    rotulo: 'Password',
+                  ),
+                ),
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: RaisedButton(
@@ -72,12 +92,16 @@ class _ConfigPageState extends State<ConfigPage> {
     final String hostname = _controladorHostname.text;
     final int port = int.tryParse(_controladorPort.text);
     final String clientID = _controladorClientId.text;
+    final String username = _controladorUsername.text;
+    final String password = _controladorPassword.text;
 
     final prefs = await SharedPreferences.getInstance();
 
     prefs.setString('hostname', hostname);
     prefs.setInt('port', port);
     prefs.setString('clientID', clientID);
+    prefs.setString('username', username);
+    prefs.setString('password', password);
 
     Navigator.pop(context, true);
   }
