@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:natal_smart/components/editor.dart';
 import 'package:natal_smart/components/text_editor.dart';
 import 'package:natal_smart/models/item_smart.dart';
 

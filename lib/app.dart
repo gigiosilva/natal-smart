@@ -23,6 +23,10 @@ class NatalSmartHomePage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.settings),
+            title: Text('Servers'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.settings),
             title: Text('Server'),
           ),
         ],
@@ -36,6 +40,11 @@ class NatalSmartHomePage extends StatelessWidget {
             });
             break;
           case 1:
+            returnValue = CupertinoTabView(builder: (context) {
+              // return ConfigPage();
+            });
+            break;
+          case 2:
             returnValue = CupertinoTabView(builder: (context) {
               return ConfigPage();
             });
