@@ -19,7 +19,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String broker = 'test.mosquitto.org';
   int port = 1883;
   String username = '';
-  String passwd = '';
+  String password = '';
   String clientIdentifier = 'gigio';
 
   List<Item> _itemsSmart = List();
@@ -128,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _itemsSmart.forEach((item) {
       if (item.codigo == topicName) {
-        item.status = message == '1' ? true : false;
+        item.status = message == item.valueOn ? true : false;
       }
     });
 
@@ -142,6 +142,8 @@ class _MyHomePageState extends State<MyHomePage> {
     broker = (prefs.getString('hostname') ?? broker);
     port = (prefs.getInt('port') ?? port);
     clientIdentifier = (prefs.getString('clientID') ?? clientIdentifier);
+    username = (prefs.getString('username') ?? username);
+    password = (prefs.getString('password') ?? password);
 
     client = mqtt.MqttClient(broker, clientIdentifier);
     client.port = port;
@@ -158,8 +160,11 @@ class _MyHomePageState extends State<MyHomePage> {
     client.connectionMessage = connMess;
 
     try {
-      await client.connect();
-      // await client.connect(username, passwd);
+      if (username == '' && password == '') {
+        await client.connect();
+      } else {
+        await client.connect(username, password);
+      }
     } catch (e) {
       print(e);
       ToastService.showNegative(msg: e.toString(), duration: 5);
