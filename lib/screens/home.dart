@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:natal_smart/components/item_smart.dart';
 import 'package:natal_smart/screens/configurations.dart';
-import 'package:natal_smart/screens/nfc.dart';
 import 'package:natal_smart/screens/novo.dart';
 import 'package:natal_smart/services/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,14 +54,14 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: Icon(Icons.nfc),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NFCPage()),
-              ).then(
-                (changed) async {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => NFCPage()),
+              // ).then(
+              //   (changed) async {
                   
-                },
-              );
+              //   },
+              // );
             },
           ),
           IconButton(
