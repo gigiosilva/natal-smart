@@ -10,6 +10,8 @@ class NovoPage extends StatefulWidget {
 class _NovoPageState extends State<NovoPage> {
   final TextEditingController _controladorNome = TextEditingController();
   final TextEditingController _controladorCodigo = TextEditingController();
+  final TextEditingController _controladorValueOn = TextEditingController();
+  final TextEditingController _controladorValueOff = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,22 @@ class _NovoPageState extends State<NovoPage> {
               controller: _controladorCodigo,
               rotulo: 'Código',
             ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Editor(
+                    controller: _controladorValueOn,
+                    rotulo: 'Valor ON',
+                  ),
+                ),
+                Expanded(
+                  child: Editor(
+                    controller: _controladorValueOff,
+                    rotulo: 'Valor OFF',
+                  ),
+                ),
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: RaisedButton(
@@ -44,8 +62,10 @@ class _NovoPageState extends State<NovoPage> {
   Future _saveConfig(BuildContext context) async {
     final String nome = _controladorNome.text;
     final String codigo = _controladorCodigo.text;
+    final String valueOn = _controladorValueOn.text;
+    final String valueOff = _controladorValueOff.text;
 
-    final itemSmart = Item(nome, codigo, false);
+    final itemSmart = Item(nome, codigo, valueOn, valueOff, false);
 
     Navigator.pop(context, itemSmart);
   }

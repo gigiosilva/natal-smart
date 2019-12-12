@@ -69,10 +69,10 @@ class _ItemSmartState extends State<ItemSmart> {
               onPressed: () {
                 if(widget.status) {
                   // setState(() => status = false);
-                  widget.onChange(widget.item.codigo, '-1');
+                  widget.onChange(widget.item.codigo, widget.item.valueOff);
                 } else {
                   // setState(() => status = true);
-                  widget.onChange(widget.item.codigo, '1');
+                  widget.onChange(widget.item.codigo, widget.item.valueOn);
                 }
               },
             ),

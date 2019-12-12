@@ -139,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _itemsSmart.forEach((item) {
       if (item.codigo == topicName) {
-        item.status = message == '1' ? true : false;
+        item.status = message == item.valueOn ? true : false;
       }
     });
 
