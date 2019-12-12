@@ -57,6 +57,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
             ),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Icon(
+                CupertinoIcons.refresh,
+                semanticLabel: 'Reload',
+              ),
+              onPressed: _refreshConnection,
+            ),
           ),
           SliverSafeArea(
             top: false,
@@ -79,73 +87,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       leading: IconButton(
-  //         icon: Icon(Icons.add),
-  //         onPressed: () {
-  // Navigator.push(
-  //   context,
-  //   MaterialPageRoute(builder: (context) => NovoPage()),
-  // ).then(
-  //   (itemRecebido) => _saveItem(itemRecebido),
-  // );
-  //         },
-  //       ),
-  //       title: Text('Smart Home'),
-  //       actions: <Widget>[
-  //         IconButton(
-  //           icon: Icon(Icons.nfc),
-  //           onPressed: () {
-  //             Navigator.push(
-  //               context,
-  //               MaterialPageRoute(builder: (context) => NFCPage()),
-  //             ).then(
-  //               (changed) async {
-
-  //               },
-  //             );
-  //           },
-  //         ),
-  //         IconButton(
-  //           icon: Icon(Icons.tune),
-  //           onPressed: () {
-  //             Navigator.push(
-  //               context,
-  //               MaterialPageRoute(builder: (context) => ConfigPage()),
-  //             ).then(
-  //               (changed) async {
-  //                 try {
-  //                   if (changed) {
-  //                     _disconnect();
-  //                     _connect();
-  //                   }
-  //                 } catch (e) {
-  //                   print(e);
-  //                 }
-  //               },
-  //             );
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //     body: ListView.builder(
-  //       itemCount: _itemsSmart.length,
-  //       itemBuilder: (context, indice) {
-  //         final item = _itemsSmart[indice];
-  //         return ItemSmart(
-  //           item: item,
-  //           index: indice,
-  //           status: item.status,
-  //           deleted: _deleteItem,
-  //           onChange: _sendMessage,
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
+  void _refreshConnection() {
+    _disconnect();
+    _connect();
+  }
 
   void _loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

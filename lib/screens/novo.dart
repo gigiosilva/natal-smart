@@ -12,64 +12,6 @@ class _NovoPageState extends State<NovoPage> {
   final TextEditingController _controladorNome = TextEditingController();
   final TextEditingController _controladorCodigo = TextEditingController();
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return DefaultTextStyle(
-  //     style: const TextStyle(
-  //       fontFamily: '.SF UI Text',
-  //       inherit: false,
-  //       fontSize: 17.0,
-  //       color: CupertinoColors.black,
-  //     ),
-  //     child: CupertinoPageScaffold(
-  //       navigationBar: const CupertinoNavigationBar(
-  //         // We're specifying a back label here because the previous page is a
-  //         // Material page. CupertinoPageRoutes could auto-populate these back
-  //         // labels.
-  //         previousPageTitle: 'Cupertino',
-  //         middle: Text('Text Fields'),
-  //       ),
-  //       child: CupertinoScrollbar(
-  //         child: ListView(
-  //           children: <Widget>[
-  //             Padding(
-  //               padding: EdgeInsets.symmetric(
-  //                   vertical: 32.0, horizontal: 16.0),
-  //               child: Column(
-  //                 children: <Widget>[
-  //                   CupertinoTextField(
-  //                     prefix: Icon(
-  //                       CupertinoIcons.person_solid,
-  //                       color: CupertinoColors.lightBackgroundGray,
-  //                       size: 28.0,
-  //                     ),
-  //                     padding:
-  //                         EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
-  //                     clearButtonMode: OverlayVisibilityMode.editing,
-  //                     textCapitalization: TextCapitalization.words,
-  //                     autocorrect: false,
-  //                     decoration: BoxDecoration(
-  //                       border: Border(
-  //                           bottom: BorderSide(
-  //                               width: 0.0,
-  //                               color: CupertinoColors.inactiveGray)),
-  //                     ),
-  //                     placeholder: 'Name',
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //             // Padding(
-  //             //   padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-  //             //   child: _buildChatTextField(),
-  //             // ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildNameField() {
     return CupertinoTextField(
       controller: _controladorNome,
@@ -158,36 +100,6 @@ class _NovoPageState extends State<NovoPage> {
       ),
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text('New Item'),
-  //     ),
-  //     body: SingleChildScrollView(
-  //       child: Column(
-  //         children: <Widget>[
-  //           Editor(
-  //             controller: _controladorNome,
-  //             rotulo: 'Nome',
-  //           ),
-  //           Editor(
-  //             controller: _controladorCodigo,
-  //             rotulo: 'Código',
-  //           ),
-  //           Padding(
-  //             padding: const EdgeInsets.all(16.0),
-  //             child: RaisedButton(
-  //               onPressed: () => _saveConfig(context),
-  //               child: Text('Save'),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Future _saveConfig(BuildContext context) async {
     final String nome = _controladorNome.text;

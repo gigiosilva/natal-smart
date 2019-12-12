@@ -1,5 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:natal_smart/components/editor.dart';
+import 'package:natal_smart/services/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 class ConfigPage extends StatefulWidget {
   @override
@@ -28,43 +29,116 @@ class _ConfigPageState extends State<ConfigPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Configurations'),
+    return CupertinoPageScaffold(
+      child: CustomScrollView(
+        slivers: <Widget>[
+          CupertinoSliverNavigationBar(
+            largeTitle: Text('Server Configuration'),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Text('Save'),
+              onPressed: () {
+                _saveConfig(context);
+              },
+            ),
+          ),
+          SliverSafeArea(
+            top: false,
+            minimum: const EdgeInsets.only(top: 4),
+            sliver: SliverList(delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                switch (index) {
+                  case 0:
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildHostnameField(),
+                    );
+                  case 1:
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildPortField(),
+                    );
+                  case 2:
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildClientIdField(),
+                    );
+                }
+                return null;
+              },
+            )),
+          )
+        ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Editor(
-                    controller: _controladorHostname,
-                    rotulo: 'Hostname',
-                  ),
-                ),
-                Expanded(
-                  child: Editor(
-                    controller: _controladorPort,
-                    rotulo: 'Port',
-                  ),
-                ),
-              ],
-            ),
-            Editor(
-              controller: _controladorClientId,
-              rotulo: 'Client ID',
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: RaisedButton(
-                onPressed: () => _saveConfig(context),
-                child: Text('Save'),
-              ),
-            ),
-          ],
+    );
+  }
+
+  Widget _buildHostnameField() {
+    return CupertinoTextField(
+      controller: _controladorHostname,
+      prefix: Icon(
+        CupertinoIcons.location_solid,
+        color: CupertinoColors.lightBackgroundGray,
+        size: 28,
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+      clearButtonMode: OverlayVisibilityMode.editing,
+      textCapitalization: TextCapitalization.words,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            width: 0,
+            color: CupertinoColors.inactiveGray,
+          ),
         ),
       ),
+      placeholder: 'Hostname',
+    );
+  }
+
+  Widget _buildPortField() {
+    return CupertinoTextField(
+      controller: _controladorPort,
+      prefix: Icon(
+        CupertinoIcons.location_solid,
+        color: CupertinoColors.lightBackgroundGray,
+        size: 28,
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+      clearButtonMode: OverlayVisibilityMode.editing,
+      textCapitalization: TextCapitalization.words,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            width: 0,
+            color: CupertinoColors.inactiveGray,
+          ),
+        ),
+      ),
+      placeholder: 'Port',
+    );
+  }
+
+  Widget _buildClientIdField() {
+    return CupertinoTextField(
+      controller: _controladorClientId,
+      prefix: Icon(
+        CupertinoIcons.location_solid,
+        color: CupertinoColors.lightBackgroundGray,
+        size: 28,
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+      clearButtonMode: OverlayVisibilityMode.editing,
+      textCapitalization: TextCapitalization.words,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            width: 0,
+            color: CupertinoColors.inactiveGray,
+          ),
+        ),
+      ),
+      placeholder: 'ClientId',
     );
   }
 
@@ -79,6 +153,8 @@ class _ConfigPageState extends State<ConfigPage> {
     prefs.setInt('port', port);
     prefs.setString('clientID', clientID);
 
-    Navigator.pop(context, true);
+    ToastService.showPositive(msg: 'Server Salvo');
+
+    // Navigator.pop(context, true);
   }
 }

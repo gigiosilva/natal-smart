@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:natal_smart/screens/configurations.dart';
 import 'package:natal_smart/screens/home.dart';
 
 class NatalSmartApp extends StatelessWidget {
@@ -21,10 +22,6 @@ class NatalSmartHomePage extends StatelessWidget {
             title: Text('List'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.tags),
-            title: Text('NFC'),
-          ),
-          BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.settings),
             title: Text('Server'),
           ),
@@ -40,16 +37,7 @@ class NatalSmartHomePage extends StatelessWidget {
             break;
           case 1:
             returnValue = CupertinoTabView(builder: (context) {
-              return CupertinoPageScaffold(
-                // child: SearchTab(),
-              );
-            });
-            break;
-          case 2:
-            returnValue = CupertinoTabView(builder: (context) {
-              return CupertinoPageScaffold(
-                // child: ShoppingCartTab(),
-              );
+              return ConfigPage();
             });
             break;
         }
