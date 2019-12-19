@@ -118,10 +118,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void _deleteItem(index) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    Item removedItem = _itemsSmart.removeAt(index);
-    List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
-    prefs.setStringList('items', stringList);
-    client.unsubscribe(removedItem.codigo);
+    setState(() {
+      Item removedItem = _itemsSmart.removeAt(index);
+      List<String> stringList = _itemsSmart.map((i) => json.encode(i)).toList();
+      prefs.setStringList('items', stringList);
+      client.unsubscribe(removedItem.codigo);
+    });
   }
 
   void _updateItem(message, topicName) async {
