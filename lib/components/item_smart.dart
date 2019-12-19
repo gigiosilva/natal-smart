@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:natal_smart/models/item_smart.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -54,7 +55,6 @@ class _ItemSmartState extends State<ItemSmart> {
                   Text(
                     widget.item.nome,
                     style: TextStyle(
-                      color: Color.fromRGBO(0, 0, 0, 0.8),
                       fontSize: 18,
                       fontStyle: FontStyle.normal,
                       fontWeight: FontWeight.normal,
@@ -64,7 +64,7 @@ class _ItemSmartState extends State<ItemSmart> {
                   Text(
                     widget.item.codigo,
                     style: TextStyle(
-                      color: Color(0xFF8E8E93),
+                      color: CupertinoColors.inactiveGray,
                       fontSize: 13,
                       fontWeight: FontWeight.w300,
                     ),
@@ -103,9 +103,9 @@ class _ItemSmartState extends State<ItemSmart> {
             left: 10,
             right: 10,
           ),
-          child: Container(
-            height: 1,
-            color: Color(0xFFD9D9D9),
+          child: Divider(
+            height: 0,
+            color: CupertinoColors.inactiveGray,
           ),
         ),
       ],
